@@ -6,6 +6,7 @@
 
 class PE_ScheduledTask
 {
+protected:
 	_MILISECONDS_TIPE trigger_time;
 	int delay;
 	std::function<_TASK_LAMBDA> task;
@@ -15,6 +16,8 @@ class PE_ScheduledTask
 public:
 	PE_ScheduledTask();
 	PE_ScheduledTask(long id, int delay_, _MILISECONDS_TIPE time, int repetitions = 1);
+	PE_ScheduledTask(const PE_ScheduledTask& other);
+	PE_ScheduledTask(const PE_ScheduledTask&& other);
 	virtual void trigger() = 0;
 	_MILISECONDS_TIPE getTriggerTime() const;
 	int getDelay() const;

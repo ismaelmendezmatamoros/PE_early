@@ -6,9 +6,17 @@ PE_ScheduledFunction::PE_ScheduledFunction(long id, int delay_, _MILISECONDS_TIP
 {
 }
 
-template <typename return_type, typename... types>
-void PE_ScheduledFunction::setFunction(return_type(f)(types...), types... Args) {}
-void PE_ScheduledFunction::trigger() {}
+PE_ScheduledFunction::PE_ScheduledFunction(const PE_ScheduledTask& other) : PE_ScheduledTask(other){
+
+}
+
+PE_ScheduledFunction::PE_ScheduledFunction(const PE_ScheduledTask&& other) : PE_ScheduledTask(other){
+
+}
+
+void PE_ScheduledFunction::trigger() {
+	task();
+}
 
 PE_ScheduledFunction::~PE_ScheduledFunction()
 {
