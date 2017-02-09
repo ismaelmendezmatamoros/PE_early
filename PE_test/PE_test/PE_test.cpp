@@ -7,17 +7,14 @@
 #include"PEScheduledFunctionTask.h"
 #include<string>
 
-int de(int h) {
-	std::cout << "cac" << std::endl;
-	return  8;
-}
+void *pt;
+
+
+
 
 int main()
 {
 	std::string h("caca");
-	PEScheduledFunctionTask p(0, 0, 0);
-	p.setFunction<int, int>(de);
-
-    return 0;
+	return 0;
 }
 
