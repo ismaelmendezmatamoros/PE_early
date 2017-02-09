@@ -2,7 +2,7 @@
 
 
 
-PE_ScheduledFunction::PE_ScheduledFunction(long id, int delay_, _MILISECONDS_TIPE time, int repetitions): PE_ScheduledTask(id,delay_,time,repetitions)
+PE_ScheduledFunction::PE_ScheduledFunction(unsigned long id, unsigned int delay_, _MILISECONDS_TIPE time, int repetitions): PE_ScheduledTask(id,delay_,time,repetitions)
 {
 }
 

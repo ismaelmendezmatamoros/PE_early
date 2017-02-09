@@ -151,11 +151,13 @@
   <ItemGroup>
     <ClCompile Include="PE_ScheduledFunction.cpp" />
     <ClCompile Include="PE_ScheduledTask.cpp" />
+    <ClCompile Include="PE_TaskScheduler.cpp" />
     <ClCompile Include="PE_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PE_ScheduledFunction.h" />
     <ClInclude Include="PE_ScheduledTask.h" />
+    <ClInclude Include="PE_TaskScheduler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
