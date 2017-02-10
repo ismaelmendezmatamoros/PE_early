@@ -9,7 +9,7 @@
 #include<queue>
 
 int de(int d, std::string k) {
-	std::cout << "sdfsdf    "<<d<<k <<std::endl;
+	 
 	return 5;
 }
 
@@ -32,9 +32,9 @@ int main()
 	PE_TaskScheduler::addTask(6000, 5000, fun);
 //	std::timed_mutex m;
 	//m.try_lock();//_for(std::chrono::milliseconds(3000));
-	std::cout << "sem,1" << std::endl;
+	 
 //	m.try_lock_for(std::chrono::milliseconds(30000));
-	std::cout << "sem,21" << std::endl;
+	//PE_TaskScheduler::stopExecution();
 	std::cin.get();
 
 	return 0;
