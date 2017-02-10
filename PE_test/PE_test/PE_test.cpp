@@ -13,11 +13,12 @@ int de(int d, std::string k) {
 	return 5;
 }
 
-int fun() 
+int fun(std::string f) 
 	{
 	std::string h("caca");
 	//PE_ScheduledFunction t(0, 0, 500, 0), k(0, 0, 554, 0);
 //	t.setFunction(de, 4, h);
+	std::cout << "exec fun" << f <<std::endl;
 	return 5;
 	}
 
@@ -26,10 +27,10 @@ int main()
 	std::string h("caca");
 //	PE_ScheduledFunction t(0, 0, 500, 0), k(0,0,554,0),w(0,0,1000,0, de,666,h);
 	PE_TaskScheduler::Init();
-	PE_TaskScheduler::addTask(20000, 5000, fun);
-	PE_TaskScheduler::addTask(12000, 5000, fun);
-	PE_TaskScheduler::addTask(5000, 5000, fun);
-	PE_TaskScheduler::addTask(6000, 5000, fun);
+	PE_TaskScheduler::addTask(20000, 10, fun, "2000");
+	PE_TaskScheduler::addTask(1000, 3, fun, "1000");
+	PE_TaskScheduler::addTask(5000, -1, fun,"5000");
+	PE_TaskScheduler::addTask(6000, 0, fun,"6000");
 //	std::timed_mutex m;
 	//m.try_lock();//_for(std::chrono::milliseconds(3000));
 	 

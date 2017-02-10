@@ -21,6 +21,7 @@ class PE_TaskScheduler
 	static std::timed_mutex trigger_mutex;
 	static std::thread* loop_thread;
 	static std::atomic<bool> false_awakening;
+	static std::lock_guard<std::timed_mutex> time_expired;
 	static bool exit;
 
 public:
@@ -41,26 +42,34 @@ public:
 	static void cancelAll();
 	static void loopCycle();
 	static void cycle();
+	static void triggerNextTask(PE_ScheduledTask* task);
 	static void stopExecution();
 	//static bool	
 	//~PE_TaskScheduler();
 	template<typename functype, typename... Args>
 	//ID_TYPE id, int delay_, MILISECONDS_TIPE time, int repetitions, functype func, Args... args): PE_ScheduledTask(id, delay_, time, repetitions
 	static void addTask(unsigned int delay_, int repetitions, functype func, Args... args) {
-		 
+		if (repetitions == 0)
+			return;
 		std::lock_guard<std::mutex> lock(queue_mutex);
-		std::cout << "inserting" << std::endl;
-			unsigned long id = ID_counter++;
-			
+			std::cout << "inserting" << std::endl;
+			unsigned long id = ID_counter++;			
 			PE_ScheduledFunction* task_pointer = new PE_ScheduledFunction(id, delay_, makeTriggerTime(std::chrono::milliseconds	(clock()), delay_), repetitions, func, args...);
-			if ( (scheduled_tasks.size() == 0) || ( task_pointer->getTriggerTime() < scheduled_tasks.top()->getTriggerTime() )  ){						//if its the firs element on the que or if it's the next one to be triggered needs to wake up the loopCycle and make it update the next wake up time
-				false_awakening = true;
-				scheduled_tasks.emplace(task_pointer);
-				//trigger_mutex.unlock();																													//awakens the loopCycle thread and makes it process the new element through a false awakening
-			}else
-				scheduled_tasks.push(task_pointer);
-			std::cout << "exit inserting" << std::endl;
+			addTask(task_pointer);
 	}
+
+	static void addTask(TASKS_QUEUED_TYPE task_pointer) {
+		if ((scheduled_tasks.size() == 0) || (task_pointer->getTriggerTime() < scheduled_tasks.top()->getTriggerTime())) {						//if its the firs element on the que or if it's the next one to be triggered needs to wake up the loopCycle and make it update the next wake up time
+			false_awakening = true;
+			scheduled_tasks.emplace(task_pointer);
+			trigger_mutex.unlock();																													//awakens the loopCycle thread and makes it process the new element through a false awakening
+		}
+		else
+			scheduled_tasks.push(task_pointer);
+		std::cout << "exit inserting" << std::endl;
+	}
+
+
 
 private:
 	static void emplaceQueue(TASKS_QUEUED_TYPE task_);

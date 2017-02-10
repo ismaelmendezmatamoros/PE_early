@@ -18,6 +18,7 @@ std::mutex PE_TaskScheduler::queue_mutex;
 std::timed_mutex PE_TaskScheduler::trigger_mutex;
 std::thread* PE_TaskScheduler::loop_thread;
 std::atomic<bool>  PE_TaskScheduler::false_awakening;
+std::lock_guard<std::timed_mutex> PE_TaskScheduler::time_expired(trigger_mutex);
 //const  MILISECONDS_TIPE PE_TaskScheduler::tics_per_milisecond = (CLOCKS_PER_SEC / 1000);
 
 bool PE_TaskScheduler::exit;
@@ -28,22 +29,48 @@ void PE_TaskScheduler::Init() {
 	false_awakening = false;
 	std::atexit([]() {PE_TaskScheduler::stopExecution(); });
 	loop_thread = new std::thread(loopCycle);
-//	ID_counter++;// 
 }
 
 void PE_TaskScheduler::loopCycle() {
 	 
-	bool empty;
-	while (!exit) {	
-		cycle();
-	}
-	
+	bool empty = false;
+	while (!exit) { 
+		cycle();		
+		{
+			std::lock_guard<std::mutex> lock(queue_mutex);
+			empty = scheduled_tasks.empty();
+		}
+		if (empty)
+			trigger_mutex.lock();
+		else
+			trigger_mutex.try_lock_for(std::chrono::milliseconds(scheduled_tasks.top()->getDelay()));
+	}	
+}
+
+void PE_TaskScheduler::triggerNextTask(PE_ScheduledTask* task) {
+		auto callable = std::mem_fn(&PE_ScheduledTask::trigger);
+		callable(task);
+		task->setRepetitions(task->getRepetitions() - (1 * (task->getRepetitions() > 0)) );
+		if (task->getRepetitions() == 0)
+			delete task;
+		else {
+			task->setTriggerTime(makeTriggerTime(std::chrono::milliseconds(clock()), task->getDelay()));
+			addTask(task);
+		}
 }
 
 void PE_TaskScheduler::cycle() { 
 	std::lock_guard<std::mutex> lock(queue_mutex); 
-	std::cout << "looping" <<std::endl;
-	std::cout << "not looping" << std::endl;
+	if (scheduled_tasks.empty()) 
+		return;	
+	if (false_awakening) {
+		false_awakening = false;
+		return;
+	}
+	else {
+		std::thread(triggerNextTask, scheduled_tasks.top()).detach();
+		scheduled_tasks.pop();
+	}
 }
 
 void PE_TaskScheduler::stopExecution() {

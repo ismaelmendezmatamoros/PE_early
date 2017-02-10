@@ -27,10 +27,12 @@ public:
 	unsigned long getID() const;
 	int getRepetitions() const;
 	bool repeatForever() const;
+	void setRepetitions(int n);
+	void setTriggerTime(MILISECONDS_TIPE time);
 	bool operator < (const PE_ScheduledTask& other);
 	bool operator > (const PE_ScheduledTask& other);
 	bool operator == (const PE_ScheduledTask& other);
-	 bool operator()(const PE_ScheduledTask * a, const PE_ScheduledTask * b) const;
+	bool operator()(const PE_ScheduledTask * a, const PE_ScheduledTask * b) const;
 
 	~PE_ScheduledTask();
 };
