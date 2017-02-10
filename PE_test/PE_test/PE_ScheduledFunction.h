@@ -27,7 +27,7 @@ public:
 	}
 
 	template<typename functype, typename... Args>
-	PE_ScheduledFunction(ID_TYPE id, int delay_, MILISECONDS_TIPE time, int repetitions, functype func, Args... args): PE_ScheduledTask(id, delay_, time, repetitions) {
+	PE_ScheduledFunction(ID_TYPE id, unsigned int delay_, MILISECONDS_TIPE time, int repetitions, functype func, Args... args): PE_ScheduledTask(id, delay_, time, repetitions) {
 		setFunction(func, args...);
 	}
 

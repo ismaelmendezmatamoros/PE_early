@@ -9,9 +9,11 @@
 #include "defines.h"
 
 
+
+
 class PE_TaskScheduler
 {
-	const static MILISECONDS_TIPE tics_per_milisecond;
+	//const static MILISECONDS_TIPE tics_per_milisecond;
 	static ID_COUNTER_TYPE ID_counter;
 	static std::priority_queue<TASKS_QUEUED_TYPE> scheduled_tasks;
 	static std::mutex read_queue_mutex;
@@ -30,7 +32,7 @@ public:
 	
 	static const MILISECONDS_TIPE makeTriggerTime(MILISECONDS_TIPE x, unsigned int delay = 0);
 	static const PE_ScheduledTask& nextTask();
-	static std::priority_queue<PE_ScheduledTask*>& queuedTasks();
+	static std::priority_queue<TASKS_QUEUED_TYPE>& queuedTasks();
 	static const PE_ScheduledTask* getTaskbyOrder(int numtask);
 	static const PE_ScheduledTask* getTaskbyID(ID_TYPE id);
 	static const PE_ScheduledTask& lastTask();
@@ -42,16 +44,20 @@ public:
 	//static bool	
 	//~PE_TaskScheduler();
 	template<typename functype, typename... Args>
-	static void addTask(int delay_, int repetitions, functype func, Args... args) {
+	//ID_TYPE id, int delay_, MILISECONDS_TIPE time, int repetitions, functype func, Args... args): PE_ScheduledTask(id, delay_, time, repetitions
+	static void addTask(unsigned int delay_, int repetitions, functype func, Args... args) {
+		std::cout << "delay_     " << delay_ << std::endl;
 		write_queue_mutex.lock();
 			unsigned long id = ID_counter++;
-			PE_ScheduledFunction* task_pointer = new PE_ScheduledFunction(id, delay_, makeTriggerTime(clock(), delay_), repetitions, func, args...);
+			
+			PE_ScheduledFunction* task_pointer = new PE_ScheduledFunction(id, delay_, makeTriggerTime(std::chrono::milliseconds	(clock()), delay_), repetitions, func, args...);
 			if ( (scheduled_tasks.size() == 0) || ( task_pointer->getTriggerTime() < scheduled_tasks.top()->getTriggerTime() )  ){						//if its the firs element on the que or if it's the next one to be triggered needs to wake up the loopCycle and make it update the next wake up time
 				false_awakening = true;
-				scheduled_tasks.push(task_pointer);
+				scheduled_tasks.emplace(task_pointer);
 				trigger_mutex.unlock();																													//awakens the loopCycle thread and makes it process the new element through a false awakening
 			}else
 				scheduled_tasks.push(task_pointer);
+			std::cout << "time___     " << scheduled_tasks.top()->getTriggerTime().count() << std::endl;
 		write_queue_mutex.unlock();
 	}
 

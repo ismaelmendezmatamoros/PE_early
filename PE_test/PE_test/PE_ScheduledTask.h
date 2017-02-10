@@ -2,6 +2,7 @@
 #include<functional>
 #include<atomic>
 #include<time.h>
+#include<chrono>
 #include "defines.h"
 
 
@@ -29,6 +30,7 @@ public:
 	bool operator < (const PE_ScheduledTask& other);
 	bool operator > (const PE_ScheduledTask& other);
 	bool operator == (const PE_ScheduledTask& other);
+	 bool operator()(const PE_ScheduledTask * a, const PE_ScheduledTask * b) const;
 
 	~PE_ScheduledTask();
 };

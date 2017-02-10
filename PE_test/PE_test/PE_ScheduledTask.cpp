@@ -7,9 +7,9 @@ PE_ScheduledTask::PE_ScheduledTask()
 }
 
 PE_ScheduledTask::PE_ScheduledTask(ID_TYPE id,  unsigned int delay_, MILISECONDS_TIPE time, int repetitions_):ID(id),
-																					delay(delay),
+																					delay(delay_),
 																					trigger_time(time),
-																					repetitions(repetitions)
+																					repetitions(repetitions_)
 																					{}
 PE_ScheduledTask::PE_ScheduledTask(const PE_ScheduledTask& other) {
 	delay = other.delay;
@@ -33,7 +33,9 @@ int PE_ScheduledTask::getRepetitions() const { return repetitions; }
 bool PE_ScheduledTask::operator < (const PE_ScheduledTask& other) { return trigger_time < other.trigger_time; }
 bool PE_ScheduledTask::operator > (const PE_ScheduledTask& other) { return trigger_time > other.trigger_time; }
 bool PE_ScheduledTask::operator == (const PE_ScheduledTask& other) { return (ID < other.ID) && (trigger_time == other.trigger_time) && (delay == other.delay); }
+bool PE_ScheduledTask::operator () (const PE_ScheduledTask* a, const PE_ScheduledTask* b) const { return a->trigger_time < b->trigger_time; };
 bool PE_ScheduledTask::repeatForever() const { return repetitions > 0; }
+
 
 PE_ScheduledTask::~PE_ScheduledTask()
 {

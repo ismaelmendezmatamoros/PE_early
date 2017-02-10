@@ -1,8 +1,18 @@
 #pragma once
 
+template<typename T>
+struct pointerOperationsWrapper  {
+	T* pointer;
+	pointerOperationsWrapper(T* ptr) :pointer(ptr) {};
+	bool operator > (const T&& other) { *pointer > *other; };
+	bool operator < (const T&& other) { *pointer < *other; };
+	bool operator == (const T&& other) { *pointer == *other; };
+	T& operator* {return *pointer; };
+	T& operator -> {return *pointer; };
+	//T& operator -> {return *pointer; };
+};
 
-
-#define MILISECONDS_TIPE clock_t
+#define MILISECONDS_TIPE std::chrono::milliseconds	//clock_t
 
 #define ID_COUNTER_TYPE std::atomic<ID_TYPE>
 #define ID_TYPE unsigned long
