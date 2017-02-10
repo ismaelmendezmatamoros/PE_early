@@ -155,6 +155,7 @@
     <ClCompile Include="PE_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="defines.h" />
     <ClInclude Include="PE_ScheduledFunction.h" />
     <ClInclude Include="PE_ScheduledTask.h" />
     <ClInclude Include="PE_TaskScheduler.h" />

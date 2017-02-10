@@ -6,7 +6,7 @@ PE_ScheduledTask::PE_ScheduledTask()
 {
 }
 
-PE_ScheduledTask::PE_ScheduledTask(unsigned long id, unsigned int delay_, _MILISECONDS_TIPE time, int repetitions_):ID(id),
+PE_ScheduledTask::PE_ScheduledTask(ID_TYPE id,  unsigned int delay_, MILISECONDS_TIPE time, int repetitions_):ID(id),
 																					delay(delay),
 																					trigger_time(time),
 																					repetitions(repetitions)
@@ -26,7 +26,7 @@ PE_ScheduledTask::PE_ScheduledTask(const PE_ScheduledTask&& other) {
 	repetitions = other.repetitions;
 	task = other.task;
 }
-_MILISECONDS_TIPE PE_ScheduledTask::getTriggerTime() const {return trigger_time; }
+MILISECONDS_TIPE PE_ScheduledTask::getTriggerTime() const {return trigger_time; }
 unsigned int PE_ScheduledTask::getDelay() const { return delay; }
 unsigned long PE_ScheduledTask::getID() const { return ID; }
 int PE_ScheduledTask::getRepetitions() const { return repetitions; }

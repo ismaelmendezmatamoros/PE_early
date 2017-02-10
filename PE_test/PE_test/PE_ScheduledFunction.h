@@ -1,12 +1,15 @@
 #pragma once
 #include "PE_ScheduledTask.h"
+#include "defines.h"
+
+
 class PE_ScheduledFunction :
 	public PE_ScheduledTask
 {
 
 public:
 	
-	PE_ScheduledFunction(unsigned long id,unsigned int delay_, _MILISECONDS_TIPE time, int repetitions);
+	PE_ScheduledFunction(ID_TYPE id, unsigned int delay_, MILISECONDS_TIPE time, int repetitions);
 	PE_ScheduledFunction(const PE_ScheduledTask& other);
 	PE_ScheduledFunction(const PE_ScheduledTask&& other);
 	
@@ -24,7 +27,7 @@ public:
 	}
 
 	template<typename functype, typename... Args>
-	PE_ScheduledFunction(unsigned long id, int delay_, _MILISECONDS_TIPE time, int repetitions, functype func, Args... args): PE_ScheduledTask(id, delay_, time, repetitions) {
+	PE_ScheduledFunction(ID_TYPE id, int delay_, MILISECONDS_TIPE time, int repetitions, functype func, Args... args): PE_ScheduledTask(id, delay_, time, repetitions) {
 		setFunction(func, args...);
 	}
 

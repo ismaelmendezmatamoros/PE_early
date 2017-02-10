@@ -1,25 +1,27 @@
 #pragma once
 #include<functional>
-#define _TASK_LAMBDA void()
-#define _MILISECONDS_TIPE unsigned long
+#include<atomic>
+#include<time.h>
+#include "defines.h"
+
 
 
 class PE_ScheduledTask
 {
 protected:
-	_MILISECONDS_TIPE trigger_time;
+	MILISECONDS_TIPE trigger_time;
 	unsigned int delay;
-	std::function<_TASK_LAMBDA> task;
-	 unsigned long ID;
+	std::function<TASK_LAMBDA> task;
+	 ID_TYPE ID;
 	int repetitions;
 
 public:
 	PE_ScheduledTask();
-	PE_ScheduledTask(unsigned long id, unsigned int delay_, _MILISECONDS_TIPE time, int repetitions = 1);
+	PE_ScheduledTask(ID_TYPE id, unsigned int delay_, MILISECONDS_TIPE time, int repetitions = 1);
 	PE_ScheduledTask(const PE_ScheduledTask& other);
 	PE_ScheduledTask(const PE_ScheduledTask&& other);
 	virtual void trigger() = 0;
-	_MILISECONDS_TIPE getTriggerTime() const;
+	MILISECONDS_TIPE getTriggerTime() const;
 	unsigned int getDelay() const;
 	unsigned long getID() const;
 	int getRepetitions() const;
