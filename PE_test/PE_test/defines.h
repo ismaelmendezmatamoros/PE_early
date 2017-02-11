@@ -12,7 +12,7 @@ struct pointerOperationsWrapper  {
 	//T& operator -> {return *pointer; };
 };
 
-#define MILISECONDS_TIPE std::chrono::milliseconds	//clock_t
+#define MILISECONDS_TIPE std::chrono::system_clock::time_point//std::chrono::milliseconds	//clock_t
 
 #define ID_COUNTER_TYPE std::atomic<ID_TYPE>
 #define ID_TYPE unsigned long

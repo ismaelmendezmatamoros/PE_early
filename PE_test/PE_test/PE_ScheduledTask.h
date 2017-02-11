@@ -32,7 +32,7 @@ public:
 	bool operator < (const PE_ScheduledTask& other);
 	bool operator > (const PE_ScheduledTask& other);
 	bool operator == (const PE_ScheduledTask& other);
-	bool operator()(const PE_ScheduledTask * a, const PE_ScheduledTask * b) const;
+	bool operator()(const PE_ScheduledTask& a, const PE_ScheduledTask& b) const;
 
 	~PE_ScheduledTask();
 };

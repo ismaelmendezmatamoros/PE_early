@@ -8,14 +8,20 @@
 #include<chrono>
 #include "defines.h"
 
-
-
+template<typename type>
+struct cmpQueuedPointers 
+{
+	bool operator()(const type lhs, const type rhs) const
+	{
+		return *lhs > *rhs;
+	}
+};
 
 class PE_TaskScheduler
 {
 	//const static MILISECONDS_TIPE tics_per_milisecond;
 	static ID_COUNTER_TYPE ID_counter;
-	static std::priority_queue<TASKS_QUEUED_TYPE> scheduled_tasks;
+	static std::priority_queue<TASKS_QUEUED_TYPE, std::vector<TASKS_QUEUED_TYPE>, cmpQueuedPointers<TASKS_QUEUED_TYPE>> scheduled_tasks;
 	static std::mutex read_queue_mutex;
 	static std::mutex queue_mutex;
 	static std::timed_mutex trigger_mutex;
@@ -33,7 +39,7 @@ public:
 	
 	static const MILISECONDS_TIPE makeTriggerTime(MILISECONDS_TIPE x, unsigned int delay = 0);
 	static const PE_ScheduledTask& nextTask();
-	static std::priority_queue<TASKS_QUEUED_TYPE>& queuedTasks();
+	static std::priority_queue<TASKS_QUEUED_TYPE, std::vector<TASKS_QUEUED_TYPE>, cmpQueuedPointers<TASKS_QUEUED_TYPE>>& queuedTasks();
 	static const PE_ScheduledTask* getTaskbyOrder(int numtask);
 	static const PE_ScheduledTask* getTaskbyID(ID_TYPE id);
 	static const PE_ScheduledTask& lastTask();
@@ -54,7 +60,7 @@ public:
 		std::lock_guard<std::mutex> lock(queue_mutex);
 			std::cout << "inserting" << std::endl;
 			unsigned long id = ID_counter++;			
-			PE_ScheduledFunction* task_pointer = new PE_ScheduledFunction(id, delay_, makeTriggerTime(std::chrono::milliseconds	(clock()), delay_), repetitions, func, args...);
+			PE_ScheduledFunction* task_pointer = new PE_ScheduledFunction(id, delay_, makeTriggerTime(std::chrono::system_clock::now(), delay_), repetitions, func, args...);
 			addTask(task_pointer);
 	}
 

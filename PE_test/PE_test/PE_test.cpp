@@ -8,29 +8,31 @@
 #include<string>
 #include<queue>
 
-int de(int d, std::string k) {
-	 
-	return 5;
+
+
+void fun()
+{
+	std::cout << "exec 5000" << std::endl;
+}
+void fan()
+{
+	std::cout << "exec 1000" << std::endl;
 }
 
-int fun(std::string f) 
-	{
-	std::string h("caca");
-	//PE_ScheduledFunction t(0, 0, 500, 0), k(0, 0, 554, 0);
-//	t.setFunction(de, 4, h);
-	std::cout << "exec fun" << f <<std::endl;
-	return 5;
-	}
+void fin()
+{
+	std::cout << "exec 20000" << std::endl;
+}
 
 int main()
 {
 	std::string h("caca");
 //	PE_ScheduledFunction t(0, 0, 500, 0), k(0,0,554,0),w(0,0,1000,0, de,666,h);
 	PE_TaskScheduler::Init();
-	PE_TaskScheduler::addTask(20000, 10, fun, "2000");
-	PE_TaskScheduler::addTask(1000, 3, fun, "1000");
-	PE_TaskScheduler::addTask(5000, -1, fun,"5000");
-	PE_TaskScheduler::addTask(6000, 0, fun,"6000");
+	PE_TaskScheduler::addTask(1000, -1, fin);
+	PE_TaskScheduler::addTask(2000, 3, fan);
+	PE_TaskScheduler::addTask(5000, 10, fun);
+	PE_TaskScheduler::addTask(6000, 0, fun);
 //	std::timed_mutex m;
 	//m.try_lock();//_for(std::chrono::milliseconds(3000));
 	 
