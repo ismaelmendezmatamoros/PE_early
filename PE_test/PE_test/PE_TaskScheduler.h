@@ -1,11 +1,12 @@
 #pragma once
 #include"PE_ScheduledFunction.h"
 #include<queue>
-#include<time.h>
+//#include<time.h>
 #include<mutex>
 #include<thread>
 #include<iostream>
 #include<chrono>
+#include<map>
 #include "defines.h"
 
 template<typename type>
@@ -15,6 +16,14 @@ struct cmpQueuedPointers
 	{
 		return *lhs > *rhs;
 	}
+};
+
+struct ActiveTaskItem {
+	PE_ScheduledTask* task;
+	std::thread* thread;
+	ActiveTaskItem(PE_ScheduledTask* new_task, std::thread* new_thread): task(new_task), thread(new_thread) {};
+	ActiveTaskItem(ActiveTaskItem& other) : task(other.task), thread(other.thread) {};
+	ActiveTaskItem() {};
 };
 
 class PE_TaskScheduler
@@ -29,7 +38,9 @@ class PE_TaskScheduler
 	static std::atomic<bool> false_awakening;
 	static std::lock_guard<std::timed_mutex> time_expired;
 	static bool exit;
-
+	static std::map<std::thread::id, ACTIVE_TASK_MAPPED_ELEMENT> active_tasks;
+	static std::vector<std::thread*> inactive_tasks;
+	static std::mutex inactive_tasks_mutex;
 public:
 	//PE_TaskScheduler();
 	static void Init();
@@ -49,6 +60,7 @@ public:
 	static void loopCycle();
 	static void cycle();
 	static void triggerNextTask(PE_ScheduledTask* task);
+	static void removeIdleThreads();
 	static void stopExecution();
 	//static bool	
 	//~PE_TaskScheduler();

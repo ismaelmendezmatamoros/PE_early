@@ -1,25 +1,16 @@
 #include "PE_TaskScheduler.h"
 
-
-/*
-PE_TaskScheduler::PE_TaskScheduler()
-{
-}
-
-PE_TaskScheduler::~PE_TaskScheduler()
-{
-}
-*/
-
 ID_COUNTER_TYPE PE_TaskScheduler::ID_counter;
 std::priority_queue<TASKS_QUEUED_TYPE, std::vector<TASKS_QUEUED_TYPE>, cmpQueuedPointers<TASKS_QUEUED_TYPE>>  PE_TaskScheduler::scheduled_tasks;
 std::mutex PE_TaskScheduler::read_queue_mutex;
 std::mutex PE_TaskScheduler::queue_mutex;
 std::timed_mutex PE_TaskScheduler::trigger_mutex;
+std::mutex PE_TaskScheduler::inactive_tasks_mutex;
 std::thread* PE_TaskScheduler::loop_thread;
 std::atomic<bool>  PE_TaskScheduler::false_awakening;
 std::lock_guard<std::timed_mutex> PE_TaskScheduler::time_expired(trigger_mutex);
-//const  MILISECONDS_TIPE PE_TaskScheduler::tics_per_milisecond = (CLOCKS_PER_SEC / 1000);
+std::map<std::thread::id, ACTIVE_TASK_MAPPED_ELEMENT> PE_TaskScheduler::active_tasks;
+std::vector<std::thread*> PE_TaskScheduler::inactive_tasks;
 bool PE_TaskScheduler::exit;
 
 
@@ -31,16 +22,26 @@ void PE_TaskScheduler::Init() {
 	loop_thread = new std::thread(loopCycle);
 }
 
-void PE_TaskScheduler::loopCycle() {
-	 
+void PE_TaskScheduler::removeIdleThreads() {  /////////////////////////////////////////////
+	if (inactive_tasks.empty())
+		return;
+	for (auto thread = inactive_tasks.size(); thread < inactive_tasks.size(); thread++ ) {
+		inactive_tasks[thread]->join();
+		delete (inactive_tasks[thread]);
+	}
+	inactive_tasks.clear();
+}
+
+void PE_TaskScheduler::loopCycle() {	 
 	bool empty = false;
-	while (!exit) { 
+	while (!exit) { 		
+		removeIdleThreads();
 		cycle();		
 		{
 			std::lock_guard<std::mutex> lock(queue_mutex);
 			empty = scheduled_tasks.empty();
 		}
-		if (empty)
+		if (empty) 
 			trigger_mutex.lock();
 		else
 			trigger_mutex.try_lock_until(scheduled_tasks.top()->getTriggerTime() );
@@ -56,7 +57,8 @@ void PE_TaskScheduler::triggerNextTask(PE_ScheduledTask* task) {
 		else {
 			task->setTriggerTime(makeTriggerTime(std::chrono::system_clock::now(), task->getDelay()));
 			addTask(task);
-		}
+		}	
+			inactive_tasks.push_back(active_tasks[std::this_thread::get_id()].thread);		
 }
 
 void PE_TaskScheduler::cycle() { 
@@ -68,15 +70,25 @@ void PE_TaskScheduler::cycle() {
 		return;
 	}
 	else {
-		std::thread(triggerNextTask, scheduled_tasks.top()).detach();
+		std::thread* task;
+		task = new  std::thread(triggerNextTask, scheduled_tasks.top() );
+		ACTIVE_TASK_MAPPED_ELEMENT active_task(scheduled_tasks.top(), task);
+		active_tasks[task->get_id()] = active_task;
 		scheduled_tasks.pop();
 	}
 }
 
-void PE_TaskScheduler::stopExecution() {
-	 
+void PE_TaskScheduler::stopExecution() {	 
 	exit = true;
 	loop_thread->join();
+	removeIdleThreads();
+	for (; !scheduled_tasks.empty(); scheduled_tasks.pop())
+		delete scheduled_tasks.top();
+	for (auto element = active_tasks.begin(); element != active_tasks.end(); (element++)) {
+		if( (element)->second.thread->joinable() )
+			(element)->second.thread->join();
+		delete (element)->second.thread;
+	}
 }
 
 const MILISECONDS_TIPE PE_TaskScheduler::makeTriggerTime(MILISECONDS_TIPE time, unsigned int delay) { return time  + std::chrono::milliseconds(delay) ; }
@@ -88,19 +100,3 @@ const PE_ScheduledTask& PE_TaskScheduler::lastTask() { return *scheduled_tasks.t
 bool PE_TaskScheduler::cancelTaskbyID(ID_TYPE id) { return false; }
 bool PE_TaskScheduler::cancelTaskbyNumber(unsigned long position) { return false; }
 void PE_TaskScheduler::cancelAll() {}
-/*
-void PE_TaskScheduler::emplaceQueue(TASKS_QUEUED_TYPE task) {
-	write_queue_mutex.lock();
-	read_queue_mutex.lock();
-	scheduled_tasks.emplace(task);
-	read_queue_mutex.unlock();
-	write_queue_mutex.unlock();
-}
-
-void PE_TaskScheduler::pushQueue(TASKS_QUEUED_TYPE task) {
-	write_queue_mutex.lock();
-	read_queue_mutex.lock();
-	scheduled_tasks.push(task);
-	read_queue_mutex.unlock();
-	write_queue_mutex.unlock();
-}*/

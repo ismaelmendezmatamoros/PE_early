@@ -15,6 +15,7 @@ protected:
 	std::function<TASK_LAMBDA> task;
 	 ID_TYPE ID;
 	int repetitions;
+	std::atomic_bool execution_finished;
 
 public:
 	PE_ScheduledTask();
@@ -28,11 +29,12 @@ public:
 	int getRepetitions() const;
 	bool repeatForever() const;
 	void setRepetitions(int n);
+	bool getExecutionFinished() const;
+	void setExecutionFinished(bool&& finished);
 	void setTriggerTime(MILISECONDS_TIPE time);
 	bool operator < (const PE_ScheduledTask& other);
 	bool operator > (const PE_ScheduledTask& other);
 	bool operator == (const PE_ScheduledTask& other);
-	bool operator()(const PE_ScheduledTask& a, const PE_ScheduledTask& b) const;
 
 	~PE_ScheduledTask();
 };

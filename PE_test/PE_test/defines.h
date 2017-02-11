@@ -12,6 +12,8 @@ struct pointerOperationsWrapper  {
 	//T& operator -> {return *pointer; };
 };
 
+
+
 #define MILISECONDS_TIPE std::chrono::system_clock::time_point//std::chrono::milliseconds	//clock_t
 
 #define ID_COUNTER_TYPE std::atomic<ID_TYPE>
@@ -19,3 +21,5 @@ struct pointerOperationsWrapper  {
 
 #define TASK_LAMBDA void()
 #define TASKS_QUEUED_TYPE PE_ScheduledTask*
+
+#define ACTIVE_TASK_MAPPED_ELEMENT ActiveTaskItem

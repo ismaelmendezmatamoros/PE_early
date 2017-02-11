@@ -8,6 +8,9 @@
 #include<string>
 #include<queue>
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 
 
 void fun()
@@ -26,6 +29,7 @@ void fin()
 
 int main()
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	std::string h("caca");
 //	PE_ScheduledFunction t(0, 0, 500, 0), k(0,0,554,0),w(0,0,1000,0, de,666,h);
 	PE_TaskScheduler::Init();
