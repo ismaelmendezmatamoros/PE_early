@@ -7,7 +7,7 @@
 #include"PE_TaskScheduler.h"
 #include<string>
 #include<queue>
-
+#include<vld.h>
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>

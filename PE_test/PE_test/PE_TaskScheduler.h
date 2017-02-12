@@ -31,7 +31,7 @@ class PE_TaskScheduler
 	//const static MILISECONDS_TIPE tics_per_milisecond;
 	static ID_COUNTER_TYPE ID_counter;
 	static std::priority_queue<TASKS_QUEUED_TYPE, std::vector<TASKS_QUEUED_TYPE>, cmpQueuedPointers<TASKS_QUEUED_TYPE>> scheduled_tasks;
-	static std::mutex read_queue_mutex;
+	static std::mutex active_tasks_mutex;
 	static std::mutex queue_mutex;
 	static std::timed_mutex trigger_mutex;
 	static std::thread* loop_thread;
@@ -90,8 +90,7 @@ public:
 
 
 private:
-	static void emplaceQueue(TASKS_QUEUED_TYPE task_);
-	static void pushQueue(TASKS_QUEUED_TYPE task_);
+
 };
 
 

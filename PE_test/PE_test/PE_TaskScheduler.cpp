@@ -2,7 +2,7 @@
 
 ID_COUNTER_TYPE PE_TaskScheduler::ID_counter;
 std::priority_queue<TASKS_QUEUED_TYPE, std::vector<TASKS_QUEUED_TYPE>, cmpQueuedPointers<TASKS_QUEUED_TYPE>>  PE_TaskScheduler::scheduled_tasks;
-std::mutex PE_TaskScheduler::read_queue_mutex;
+std::mutex PE_TaskScheduler::active_tasks_mutex;
 std::mutex PE_TaskScheduler::queue_mutex;
 std::timed_mutex PE_TaskScheduler::trigger_mutex;
 std::mutex PE_TaskScheduler::inactive_tasks_mutex;
@@ -49,16 +49,17 @@ void PE_TaskScheduler::loopCycle() {
 }
 
 void PE_TaskScheduler::triggerNextTask(PE_ScheduledTask* task) {
-		auto callable = std::mem_fn(&PE_ScheduledTask::trigger);
-		callable(task);
-		task->setRepetitions(task->getRepetitions() - (1 * (task->getRepetitions() > 0)) );
-		if (task->getRepetitions() == 0)
-			delete task;
-		else {
-			task->setTriggerTime(makeTriggerTime(std::chrono::system_clock::now(), task->getDelay()));
-			addTask(task);
-		}	
-			inactive_tasks.push_back(active_tasks[std::this_thread::get_id()].thread);		
+	auto callable = std::mem_fn(&PE_ScheduledTask::trigger);
+	callable(task);
+	task->setRepetitions(task->getRepetitions() - (1 * (task->getRepetitions() > 0)));
+	if (task->getRepetitions() == 0)
+		delete task;
+	else {
+		task->setTriggerTime(makeTriggerTime(std::chrono::system_clock::now(), task->getDelay()));
+		addTask(task);
+	}
+	inactive_tasks.push_back(active_tasks[std::this_thread::get_id()].thread);
+	//active_tasks.erase(std::this_thread::get_id());
 }
 
 void PE_TaskScheduler::cycle() { 
@@ -85,10 +86,11 @@ void PE_TaskScheduler::stopExecution() {
 	for (; !scheduled_tasks.empty(); scheduled_tasks.pop())
 		delete scheduled_tasks.top();
 	for (auto element = active_tasks.begin(); element != active_tasks.end(); (element++)) {
-		if( (element)->second.thread->joinable() )
-			(element)->second.thread->join();
+		/*if( (element)->second.thread->joinable() )
+			(element)->second.thread->join();*/
 		delete (element)->second.thread;
 	}
+	delete loop_thread;
 }
 
 const MILISECONDS_TIPE PE_TaskScheduler::makeTriggerTime(MILISECONDS_TIPE time, unsigned int delay) { return time  + std::chrono::milliseconds(delay) ; }
