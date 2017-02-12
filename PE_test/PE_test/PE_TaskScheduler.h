@@ -41,6 +41,7 @@ class PE_TaskScheduler
 	static std::map<std::thread::id, ACTIVE_TASK_MAPPED_ELEMENT> active_tasks;
 	static std::vector<std::thread*> inactive_tasks;
 	static std::mutex inactive_tasks_mutex;
+
 public:
 	//PE_TaskScheduler();
 	static void Init();
@@ -62,21 +63,23 @@ public:
 	static void triggerNextTask(PE_ScheduledTask* task);
 	static void removeIdleThreads();
 	static void stopExecution();
+	template<typename T, typename... Args>
+	static void doSafely(T function, std::mutex& mut, Args... args);
 	//static bool	
 	//~PE_TaskScheduler();
 	template<typename functype, typename... Args>
 	//ID_TYPE id, int delay_, MILISECONDS_TIPE time, int repetitions, functype func, Args... args): PE_ScheduledTask(id, delay_, time, repetitions
 	static void addTask(unsigned int delay_, int repetitions, functype func, Args... args) {
 		if (repetitions == 0)
-			return;
-		std::lock_guard<std::mutex> lock(queue_mutex);
-			std::cout << "inserting" << std::endl;
-			unsigned long id = ID_counter++;			
-			PE_ScheduledFunction* task_pointer = new PE_ScheduledFunction(id, delay_, makeTriggerTime(std::chrono::system_clock::now(), delay_), repetitions, func, args...);
-			addTask(task_pointer);
+			return;		
+		std::cout << "inserting" << std::endl;
+		unsigned long id = ID_counter++;			
+		PE_ScheduledFunction* task_pointer = new PE_ScheduledFunction(id, delay_, makeTriggerTime(std::chrono::system_clock::now(), delay_), repetitions, func, args...);
+		addTask(task_pointer);
 	}
 
 	static void addTask(TASKS_QUEUED_TYPE task_pointer) {
+		std::lock_guard<std::mutex> lock(queue_mutex);
 		if ((scheduled_tasks.size() == 0) || (task_pointer->getTriggerTime() < scheduled_tasks.top()->getTriggerTime())) {						//if its the firs element on the que or if it's the next one to be triggered needs to wake up the loopCycle and make it update the next wake up time
 			false_awakening = true;
 			scheduled_tasks.emplace(task_pointer);

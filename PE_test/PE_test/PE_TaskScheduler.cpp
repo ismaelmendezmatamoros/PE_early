@@ -18,18 +18,21 @@ void PE_TaskScheduler::Init() {
 	ID_counter = 0;
 	exit = false;
 	false_awakening = false;
-	std::atexit([]() {PE_TaskScheduler::stopExecution(); });
 	loop_thread = new std::thread(loopCycle);
+	std::atexit([]() {PE_TaskScheduler::stopExecution(); });
+	
 }
 
 void PE_TaskScheduler::removeIdleThreads() {  /////////////////////////////////////////////
 	if (inactive_tasks.empty())
 		return;
-	for (auto thread = inactive_tasks.size(); thread < inactive_tasks.size(); thread++ ) {
+	for (auto thread = 0; thread < inactive_tasks.size(); thread++ ) {
+		auto b = inactive_tasks[thread]->get_id();
 		inactive_tasks[thread]->join();
-		delete (inactive_tasks[thread]);
+		doSafely([&]() {active_tasks.erase(b); }, active_tasks_mutex);
+		delete inactive_tasks[thread];
 	}
-	inactive_tasks.clear();
+	doSafely([&]() { inactive_tasks.clear(); }, inactive_tasks_mutex);
 }
 
 void PE_TaskScheduler::loopCycle() {	 
@@ -48,7 +51,7 @@ void PE_TaskScheduler::loopCycle() {
 	}	
 }
 
-void PE_TaskScheduler::triggerNextTask(PE_ScheduledTask* task) {
+void PE_TaskScheduler::triggerNextTask(PE_ScheduledTask* task ) {
 	auto callable = std::mem_fn(&PE_ScheduledTask::trigger);
 	callable(task);
 	task->setRepetitions(task->getRepetitions() - (1 * (task->getRepetitions() > 0)));
@@ -58,8 +61,8 @@ void PE_TaskScheduler::triggerNextTask(PE_ScheduledTask* task) {
 		task->setTriggerTime(makeTriggerTime(std::chrono::system_clock::now(), task->getDelay()));
 		addTask(task);
 	}
-	inactive_tasks.push_back(active_tasks[std::this_thread::get_id()].thread);
-	//active_tasks.erase(std::this_thread::get_id());
+	auto j = std::this_thread::get_id();
+	doSafely([&]() { inactive_tasks.push_back(active_tasks[j].thread); }, inactive_tasks_mutex);
 }
 
 void PE_TaskScheduler::cycle() { 
@@ -72,25 +75,34 @@ void PE_TaskScheduler::cycle() {
 	}
 	else {
 		std::thread* task;
-		task = new  std::thread(triggerNextTask, scheduled_tasks.top() );
-		ACTIVE_TASK_MAPPED_ELEMENT active_task(scheduled_tasks.top(), task);
-		active_tasks[task->get_id()] = active_task;
+		auto top = scheduled_tasks.top();
 		scheduled_tasks.pop();
+		task = new  std::thread(triggerNextTask, top);
+		ACTIVE_TASK_MAPPED_ELEMENT active_task(top, task);
+		doSafely([&]() { active_tasks[task->get_id()] = active_task; }, active_tasks_mutex);
+		
 	}
 }
 
-void PE_TaskScheduler::stopExecution() {	 
+void PE_TaskScheduler::stopExecution() {
 	exit = true;
+	trigger_mutex.unlock();
 	loop_thread->join();
 	removeIdleThreads();
 	for (; !scheduled_tasks.empty(); scheduled_tasks.pop())
 		delete scheduled_tasks.top();
 	for (auto element = active_tasks.begin(); element != active_tasks.end(); (element++)) {
-		/*if( (element)->second.thread->joinable() )
-			(element)->second.thread->join();*/
+		if( (element)->second.thread->joinable() )
+			(element)->second.thread->join();
 		delete (element)->second.thread;
 	}
 	delete loop_thread;
+}
+
+template<typename T, typename... Args>
+static void PE_TaskScheduler::doSafely(T func, std::mutex& mut, Args... args) {
+	std::lock_guard<std::mutex> lock(mut);
+	func(args...);
 }
 
 const MILISECONDS_TIPE PE_TaskScheduler::makeTriggerTime(MILISECONDS_TIPE time, unsigned int delay) { return time  + std::chrono::milliseconds(delay) ; }

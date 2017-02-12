@@ -42,7 +42,6 @@ void PE_ScheduledTask::setExecutionFinished(bool&& finished) { execution_finishe
 bool PE_ScheduledTask::repeatForever() const { return repetitions > 0; }
 void PE_ScheduledTask::setRepetitions(int nrep) { repetitions = nrep; }
 void PE_ScheduledTask::setTriggerTime(MILISECONDS_TIPE time) { trigger_time = time; }
-
 PE_ScheduledTask::~PE_ScheduledTask()
 {
 }
